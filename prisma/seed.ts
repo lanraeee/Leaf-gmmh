@@ -4,13 +4,15 @@
  *
  * Usage: npx tsx prisma/seed.ts
  */
-import { Pool } from 'pg'
-import { PrismaPg } from '@prisma/adapter-pg'
+import { neonConfig } from '@neondatabase/serverless'
+import { PrismaNeon } from '@prisma/adapter-neon'
 import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
+import ws from 'ws'
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL })
-const adapter = new PrismaPg(pool)
+neonConfig.webSocketConstructor = ws
+
+const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL! })
 const db = new PrismaClient({ adapter })
 
 async function main() {
@@ -27,65 +29,34 @@ async function main() {
   const admin = await db.staff.upsert({
     where: { email: 'admin@hse.ie' },
     update: {},
-    create: {
-      name: 'Admin User',
-      email: 'admin@hse.ie',
-      role: 'CHARGE_NURSE',
-      pinHash: adminPin,
-      wardId: ward.id,
-    },
+    create: { name: 'Admin User', email: 'admin@hse.ie', role: 'CHARGE_NURSE', pinHash: adminPin, wardId: ward.id },
   })
   console.log('Admin created:', admin.email, '(PIN: 123456)')
 
-  const nursePin = await bcrypt.hash('654321', 12)
   const senior = await db.staff.upsert({
     where: { email: 'senior@hse.ie' },
     update: {},
-    create: {
-      name: 'Sr. Walsh',
-      email: 'senior@hse.ie',
-      role: 'SENIOR_NURSE',
-      pinHash: nursePin,
-      wardId: ward.id,
-    },
+    create: { name: 'Sr. Walsh', email: 'senior@hse.ie', role: 'SENIOR_NURSE', pinHash: await bcrypt.hash('654321', 12), wardId: ward.id },
   })
   console.log('Senior nurse created:', senior.email, '(PIN: 654321)')
 
   const nurse = await db.staff.upsert({
     where: { email: 'nurse@hse.ie' },
     update: {},
-    create: {
-      name: 'Staff Nurse Murphy',
-      email: 'nurse@hse.ie',
-      pinHash: await bcrypt.hash('password', 12),
-      role: 'NURSE',
-      wardId: ward.id,
-    },
+    create: { name: 'Staff Nurse Murphy', email: 'nurse@hse.ie', pinHash: await bcrypt.hash('password', 12), role: 'NURSE', wardId: ward.id },
   })
   console.log('Nurse created:', nurse.email, '(password: password)')
 
-  const patient = await db.patient.upsert({
+  await db.patient.upsert({
     where: { mrn: 'MRN-TEST-001' },
     update: {},
-    create: {
-      mrn: 'MRN-TEST-001',
-      firstName: 'Test',
-      lastName: 'Patient',
-      dateOfBirth: new Date('1985-06-15'),
-      gender: 'Male',
-      legalStatus: 'VOLUNTARY',
-      wardId: ward.id,
-      consultantName: 'Dr. Smith',
-      riskLevel: 'LOW',
-    },
+    create: { mrn: 'MRN-TEST-001', firstName: 'Test', lastName: 'Patient', dateOfBirth: new Date('1985-06-15'), gender: 'Male', legalStatus: 'VOLUNTARY', wardId: ward.id, consultantName: 'Dr. Smith', riskLevel: 'LOW' },
   })
-  console.log('Sample patient created:', patient.mrn)
+  console.log('Sample patient created: MRN-TEST-001')
 
   console.log('\nSeed complete.')
-  console.log('Login at /login with nurse@hse.ie / password')
-  console.log('Approve leave with PIN: 654321 (Sr. Walsh) or 123456 (Admin)')
+  console.log('Login: nurse@hse.ie / password')
+  console.log('Approve PIN: 654321 (Sr. Walsh) or 123456 (Admin)')
 }
 
-main()
-  .catch(console.error)
-  .finally(() => pool.end())
+main().catch(console.error)

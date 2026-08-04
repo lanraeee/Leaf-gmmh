@@ -2,11 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { auditLog } from '@/lib/audit'
-import { writeFile, mkdir } from 'fs/promises'
-import { join } from 'path'
+import { put } from '@vercel/blob'
 import { randomUUID } from 'crypto'
-
-const UPLOADS_DIR = join(process.cwd(), 'uploads')
 
 export async function GET(req: NextRequest) {
   const session = await auth()
@@ -56,27 +53,32 @@ export async function POST(req: NextRequest) {
   const audioFile = formData.get('audio') as File | null
   const photoFile = formData.get('photo') as File | null
 
-  const patient = await db.patient.findUnique({ where: { id: patientId }, include: { ward: true } })
+  const patient = await db.patient.findUnique({
+    where: { id: patientId },
+    include: { ward: true },
+  })
   if (!patient) return NextResponse.json({ error: 'Patient not found' }, { status: 404 })
 
-  await mkdir(UPLOADS_DIR, { recursive: true })
-
-  // Save files to disk (encrypted at rest handled by OS/storage layer)
+  // Upload files to Vercel Blob (replaces disk storage — works on serverless Vercel)
   let audioPath: string | null = null
   let photoPath: string | null = null
 
   if (audioFile && audioFile.size > 0) {
-    const buf = Buffer.from(await audioFile.arrayBuffer())
-    audioPath = `audio/${randomUUID()}.webm`
-    await mkdir(join(UPLOADS_DIR, 'audio'), { recursive: true })
-    await writeFile(join(UPLOADS_DIR, audioPath), buf)
+    const { url } = await put(
+      `plds/audio/${randomUUID()}.webm`,
+      audioFile,
+      { access: 'public', addRandomSuffix: false }
+    )
+    audioPath = url
   }
 
   if (photoFile && photoFile.size > 0) {
-    const buf = Buffer.from(await photoFile.arrayBuffer())
-    photoPath = `photos/${randomUUID()}.jpg`
-    await mkdir(join(UPLOADS_DIR, 'photos'), { recursive: true })
-    await writeFile(join(UPLOADS_DIR, photoPath), buf)
+    const { url } = await put(
+      `plds/photos/${randomUUID()}.jpg`,
+      photoFile,
+      { access: 'public', addRandomSuffix: false }
+    )
+    photoPath = url
   }
 
   const clothing = clothingRaw ? JSON.parse(clothingRaw) : {}

@@ -1,3 +1,1 @@
-module.exports = {
-  schema: 'prisma/schema.prisma'
-}
+module.exports = { schema: 'prisma/schema.prisma' }
