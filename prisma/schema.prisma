@@ -1,0 +1,289 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum Role {
+  NURSE
+  SENIOR_NURSE
+  CHARGE_NURSE
+  ADMIN
+}
+
+enum LegalStatus {
+  VOLUNTARY
+  INVOLUNTARY_SECTION
+  COMMUNITY_ORDER
+}
+
+enum LeaveType {
+  UNESCORTED
+  ESCORTED
+  THERAPEUTIC_LEAVE
+  OVERNIGHT
+  EXTENDED
+}
+
+enum LeaveStatus {
+  PENDING_APPROVAL
+  APPROVED
+  ON_LEAVE
+  RETURNED
+  OVERDUE
+  CANCELLED
+}
+
+enum ConsentStatus {
+  CONSENTED
+  DECLINED
+  NOT_APPLICABLE
+}
+
+enum AlertType {
+  OVERDUE
+  APPROACHING_DUE
+  NOT_RETURNED
+  INCIDENT
+}
+
+enum AlertSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+// ─── Core Entities ────────────────────────────────────────────────────────────
+
+model Ward {
+  id          String   @id @default(cuid())
+  name        String
+  code        String   @unique
+  location    String
+  phone       String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  staff       Staff[]
+  patients    Patient[]
+  leaveRecords LeaveRecord[]
+}
+
+model Staff {
+  id            String   @id @default(cuid())
+  azureId       String?  @unique
+  name          String
+  email         String   @unique
+  role          Role     @default(NURSE)
+  pinHash       String?
+  isActive      Boolean  @default(true)
+  wardId        String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  ward          Ward?         @relation(fields: [wardId], references: [id])
+  initiatedLeaves LeaveRecord[] @relation("InitiatedBy")
+  approvedLeaves  LeaveApproval[]
+  returnedLeaves  LeaveRecord[] @relation("ReturnedBy")
+  auditLogs       AuditLog[]
+  sessions        Session[]
+  accounts        Account[]
+}
+
+model Patient {
+  id              String       @id @default(cuid())
+  // PARIS fields — populated from PARIS when available, manual entry until then
+  parisId         String?      @unique
+  mrn             String       @unique
+  firstName       String
+  lastName        String
+  dateOfBirth     DateTime
+  gender          String?
+  legalStatus     LegalStatus  @default(VOLUNTARY)
+  wardId          String
+  consultantName  String?
+  admissionDate   DateTime?
+  riskLevel       String?      @default("LOW")
+  // PARIS sync metadata
+  parisLastSync   DateTime?
+  parisSource     Boolean      @default(false)
+  isActive        Boolean      @default(true)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  ward            Ward         @relation(fields: [wardId], references: [id])
+  leaveRecords    LeaveRecord[]
+}
+
+// ─── Leave Records ────────────────────────────────────────────────────────────
+
+model LeaveRecord {
+  id                String       @id @default(cuid())
+  patientId         String
+  wardId            String
+  initiatedById     String
+  returnedById      String?
+
+  leaveType         LeaveType
+  status            LeaveStatus  @default(PENDING_APPROVAL)
+
+  destination       String
+  destinationDetail String?
+  escortName        String?
+  escortPhone       String?
+
+  departureTime     DateTime?
+  agreedReturnTime  DateTime?
+  proposedReturnTime DateTime?
+  isTimeAgreed      Boolean      @default(false)
+  actualReturnTime  DateTime?
+
+  returnConditionNotes String?
+  incidentOnReturn     Boolean  @default(false)
+  incidentDetail       String?
+
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  patient           Patient        @relation(fields: [patientId], references: [id])
+  ward              Ward           @relation(fields: [wardId], references: [id])
+  initiatedBy       Staff          @relation("InitiatedBy", fields: [initiatedById], references: [id])
+  returnedBy        Staff?         @relation("ReturnedBy", fields: [returnedById], references: [id])
+  approval          LeaveApproval?
+  consent           PatientConsent?
+  voiceRecording    VoiceRecording?
+  appearance        PatientAppearance?
+  alerts            Alert[]
+  auditLogs         AuditLog[]
+}
+
+model LeaveApproval {
+  id              String   @id @default(cuid())
+  leaveRecordId   String   @unique
+  approvedById    String
+  method          String   // "PIN" | "SIGNATURE"
+  signatureData   String?  @db.Text
+  approvedAt      DateTime @default(now())
+  notes           String?
+
+  leaveRecord     LeaveRecord @relation(fields: [leaveRecordId], references: [id])
+  approvedBy      Staff       @relation(fields: [approvedById], references: [id])
+}
+
+model PatientConsent {
+  id              String        @id @default(cuid())
+  leaveRecordId   String        @unique
+  status          ConsentStatus
+  consentedAt     DateTime?
+  declineReason   String?
+  witnessedBy     String?
+
+  leaveRecord     LeaveRecord   @relation(fields: [leaveRecordId], references: [id])
+}
+
+// ─── Voice & Media ────────────────────────────────────────────────────────────
+
+model VoiceRecording {
+  id              String   @id @default(cuid())
+  leaveRecordId   String   @unique
+  filePath        String
+  durationSeconds Int?
+  transcript      String?  @db.Text
+  transcriptedAt  DateTime?
+  mimeType        String   @default("audio/webm")
+  sizeBytes       Int?
+  createdAt       DateTime @default(now())
+
+  leaveRecord     LeaveRecord @relation(fields: [leaveRecordId], references: [id])
+}
+
+model PatientAppearance {
+  id              String   @id @default(cuid())
+  leaveRecordId   String   @unique
+  photoPath       String?
+  faceBlurred     Boolean  @default(true)
+
+  head            String?
+  upperBody       String?
+  lowerBody       String?
+  footwear        String?
+  accessories     String?
+  additionalNotes String?
+
+  capturedAt      DateTime @default(now())
+
+  leaveRecord     LeaveRecord @relation(fields: [leaveRecordId], references: [id])
+}
+
+// ─── Alerts ───────────────────────────────────────────────────────────────────
+
+model Alert {
+  id              String        @id @default(cuid())
+  leaveRecordId   String
+  type            AlertType
+  severity        AlertSeverity @default(MEDIUM)
+  message         String
+  isAcknowledged  Boolean       @default(false)
+  acknowledgedBy  String?
+  acknowledgedAt  DateTime?
+  createdAt       DateTime      @default(now())
+
+  leaveRecord     LeaveRecord   @relation(fields: [leaveRecordId], references: [id])
+}
+
+// ─── Audit Trail ──────────────────────────────────────────────────────────────
+
+model AuditLog {
+  id              String   @id @default(cuid())
+  staffId         String
+  leaveRecordId   String?
+  action          String
+  detail          String?  @db.Text
+  ipAddress       String?
+  userAgent       String?
+  createdAt       DateTime @default(now())
+
+  staff           Staff        @relation(fields: [staffId], references: [id])
+  leaveRecord     LeaveRecord? @relation(fields: [leaveRecordId], references: [id])
+}
+
+// ─── NextAuth Tables ─────────────────────────────────────────────────────────
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String? @db.Text
+  access_token       String? @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String? @db.Text
+  session_state      String?
+  user               Staff   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         Staff    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
