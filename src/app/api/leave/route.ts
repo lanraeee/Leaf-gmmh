@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
     const { url } = await put(
       `plds/audio/${randomUUID()}.webm`,
       audioFile,
-      { access: 'public', addRandomSuffix: false }
+      { access: 'private', addRandomSuffix: false }
     )
     audioPath = url
   }
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
     const { url } = await put(
       `plds/photos/${randomUUID()}.jpg`,
       photoFile,
-      { access: 'public', addRandomSuffix: false }
+      { access: 'private', addRandomSuffix: false }
     )
     photoPath = url
   }
