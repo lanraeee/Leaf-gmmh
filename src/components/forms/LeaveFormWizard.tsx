@@ -65,7 +65,7 @@ export function LeaveFormWizard() {
     switch (step) {
       case 0: return !!patient
       case 1: return !!consentStatus
-      case 2: return consentStatus === 'CONSENTED' ? !!audioBlob : !!assessmentNote
+      case 2: return !!audioBlob || !!assessmentNote
       case 3: return true
       case 4: return !!leaveDetails.leaveType && !!leaveDetails.destination && !!leaveDetails.returnDate && !!leaveDetails.returnTime
       default: return false

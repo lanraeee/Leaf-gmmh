@@ -1,8 +1,9 @@
 'use client'
 
+import { useState } from 'react'
 import { VoiceRecorder } from '@/components/media/VoiceRecorder'
 import { Textarea } from '@/components/ui/textarea'
-import { MicOff } from 'lucide-react'
+import { MicOff, ChevronDown } from 'lucide-react'
 
 interface AssessmentStepProps {
   consentGiven: boolean
@@ -21,6 +22,8 @@ export function AssessmentStep({
   declineNote,
   onDeclineNoteChange,
 }: AssessmentStepProps) {
+  const [showNoteOverride, setShowNoteOverride] = useState(false)
+
   if (!consentGiven) {
     return (
       <div className="space-y-4">
@@ -54,6 +57,29 @@ export function AssessmentStep({
         onClear={onRecordingClear}
         label={hasRecording ? 'Recording saved' : 'Tap to record patient response'}
       />
+      {!hasRecording && (
+        <div>
+          <button
+            type="button"
+            onClick={() => setShowNoteOverride((v) => !v)}
+            className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showNoteOverride ? 'rotate-180' : ''}`} />
+            Can&apos;t record? Add a written note instead
+          </button>
+          {showNoteOverride && (
+            <div className="mt-3">
+              <Textarea
+                label="Clinical observation (if recording unavailable)"
+                placeholder="Describe the patient's mood, presentation, and how they are feeling..."
+                value={declineNote}
+                onChange={(e) => onDeclineNoteChange(e.target.value)}
+                rows={4}
+              />
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }
