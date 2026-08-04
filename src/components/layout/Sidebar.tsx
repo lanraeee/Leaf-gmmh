@@ -17,9 +17,9 @@ interface SidebarProps {
 const NAV = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['NURSE', 'SENIOR_NURSE', 'CHARGE_NURSE', 'ADMIN'] },
   { href: '/leave/new', label: 'New Leave', icon: ClipboardList, roles: ['NURSE', 'SENIOR_NURSE', 'CHARGE_NURSE'] },
-  { href: '/admin/patients', label: 'Patients', icon: Users, roles: ['CHARGE_NURSE', 'ADMIN'] },
-  { href: '/admin/staff', label: 'Staff & PINs', icon: ShieldCheck, roles: ['CHARGE_NURSE', 'ADMIN'] },
-  { href: '/admin/reports', label: 'Reports', icon: BarChart3, roles: ['CHARGE_NURSE', 'ADMIN'] },
+  { href: '/patients', label: 'Patients', icon: Users, roles: ['CHARGE_NURSE', 'ADMIN'] },
+  { href: '/staff', label: 'Staff & PINs', icon: ShieldCheck, roles: ['CHARGE_NURSE', 'ADMIN'] },
+  { href: '/reports', label: 'Reports', icon: BarChart3, roles: ['CHARGE_NURSE', 'ADMIN'] },
 ]
 
 export function Sidebar({ userName, wardName, role }: SidebarProps) {

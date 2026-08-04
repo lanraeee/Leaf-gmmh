@@ -9,7 +9,7 @@
     "lint": "eslint",
     "db:push": "prisma db push",
     "db:push:reset": "prisma db push --force-reset",
-    "db:seed": "npx tsx prisma/seed.ts",
+    "db:seed": "npx tsx --env-file .env.local prisma/seed.ts",
     "db:studio": "prisma studio",
     "type-check": "tsc --noEmit"
   },
