@@ -18,6 +18,7 @@ export const parisStub: ParisAdapter = {
     })
     if (!patient) return null
     return {
+      id: patient.id,
       parisId: patient.parisId ?? patient.id,
       mrn: patient.mrn,
       firstName: patient.firstName,
@@ -26,6 +27,7 @@ export const parisStub: ParisAdapter = {
       gender: patient.gender ?? undefined,
       legalStatus: patient.legalStatus,
       wardCode: patient.ward.code,
+      ward: { id: patient.ward.id, name: patient.ward.name, code: patient.ward.code },
       consultantName: patient.consultantName ?? undefined,
       riskLevel: patient.riskLevel ?? undefined,
     }
@@ -46,6 +48,7 @@ export const parisStub: ParisAdapter = {
       take: 20,
     })
     return patients.map((p) => ({
+      id: p.id,
       parisId: p.parisId ?? p.id,
       mrn: p.mrn,
       firstName: p.firstName,
@@ -54,6 +57,7 @@ export const parisStub: ParisAdapter = {
       gender: p.gender ?? undefined,
       legalStatus: p.legalStatus,
       wardCode: p.ward.code,
+      ward: { id: p.ward.id, name: p.ward.name, code: p.ward.code },
       consultantName: p.consultantName ?? undefined,
       riskLevel: p.riskLevel ?? undefined,
     }))

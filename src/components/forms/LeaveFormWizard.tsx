@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ChevronLeft, ChevronRight, Send } from 'lucide-react'
+import { toast } from 'sonner'
 import { PatientStep } from './steps/PatientStep'
 import { ConsentStep } from './steps/ConsentStep'
 import { AssessmentStep } from './steps/AssessmentStep'
@@ -76,7 +77,8 @@ export function LeaveFormWizard() {
     setSubmitting(true)
     try {
       const formData = new FormData()
-      formData.append('patientId', patient.id)
+      formData.append('patientId', (patient as any).id ?? '')
+      formData.append('patientMrn', patient.mrn)
       formData.append('leaveType', leaveDetails.leaveType)
       formData.append('destination', leaveDetails.destination)
       formData.append('destinationDetail', leaveDetails.destinationDetail)
@@ -96,9 +98,13 @@ export function LeaveFormWizard() {
       const res = await fetch('/api/leave', { method: 'POST', body: formData })
       const data = await res.json()
 
-      if (data.id) {
+      if (res.ok && data.id) {
         router.push(`/leave/${data.id}/approve`)
+      } else {
+        toast.error(data.error ?? 'Failed to submit leave record. Please try again.')
       }
+    } catch (err) {
+      toast.error('Network error — please check your connection and try again.')
     } finally {
       setSubmitting(false)
     }

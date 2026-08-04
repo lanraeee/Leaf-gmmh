@@ -136,6 +136,7 @@ export interface LeaveFormData {
 
 // PARIS integration types — used by both stub and live implementation
 export interface ParisPatient {
+  id?: string        // DB primary key — present in stub mode, absent when using live PARIS API
   parisId: string
   mrn: string
   firstName: string
@@ -144,6 +145,7 @@ export interface ParisPatient {
   gender?: string
   legalStatus: LegalStatus
   wardCode: string
+  ward?: { id: string; name: string; code: string }
   consultantName?: string
   riskLevel?: string
   admissionDate?: string

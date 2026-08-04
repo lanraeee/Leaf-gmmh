@@ -53,8 +53,11 @@ export async function POST(req: NextRequest) {
   const audioFile = formData.get('audio') as File | null
   const photoFile = formData.get('photo') as File | null
 
-  const patient = await db.patient.findUnique({
-    where: { id: patientId },
+  const patientMrn = formData.get('patientMrn') as string | null
+  const patient = await db.patient.findFirst({
+    where: patientId && patientId !== 'undefined'
+      ? { id: patientId }
+      : { mrn: patientMrn ?? '' },
     include: { ward: true },
   })
   if (!patient) return NextResponse.json({ error: 'Patient not found' }, { status: 404 })
