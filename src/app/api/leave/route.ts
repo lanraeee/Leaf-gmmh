@@ -24,6 +24,8 @@ export async function GET(req: NextRequest) {
       consent: true,
       voiceRecording: true,
       appearance: true,
+      awolEscalation: { include: { escalatedBy: true } },
+      returnedBy: true,
     },
     orderBy: { createdAt: 'desc' },
     take: 100,
