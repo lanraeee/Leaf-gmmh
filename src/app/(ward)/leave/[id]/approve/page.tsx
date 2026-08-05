@@ -28,7 +28,7 @@ export default async function ApprovePage({ params }: Props) {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Senior Nurse Approval</h1>
+        <h1 className="text-xl md:text-2xl font-bold text-gray-900">Senior Nurse Approval</h1>
         <p className="text-sm text-gray-500">
           Review the leave record below, then enter your PIN or sign to approve
         </p>

@@ -143,11 +143,11 @@ export function LeaveFormWizard() {
 
       {/* Step content */}
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm">
-        <div className="px-6 py-4 border-b border-gray-100">
+        <div className="px-4 md:px-6 py-4 border-b border-gray-100">
           <h2 className="text-lg font-semibold text-gray-900">{STEPS[step].title}</h2>
           <p className="text-sm text-gray-500">{STEPS[step].description}</p>
         </div>
-        <div className="px-6 py-6">
+        <div className="px-4 md:px-6 py-4 md:py-6">
           {step === 0 && <PatientStep selectedPatient={patient} onSelect={setPatient} />}
           {step === 1 && (
             <ConsentStep
@@ -183,7 +183,7 @@ export function LeaveFormWizard() {
             />
           )}
         </div>
-        <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 rounded-b-2xl flex justify-between">
+        <div className="px-4 md:px-6 py-4 border-t border-gray-100 bg-gray-50 rounded-b-2xl flex justify-between">
           <Button
             variant="ghost"
             onClick={() => setStep((s) => s - 1)}

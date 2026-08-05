@@ -10,6 +10,20 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  /* xs breakpoint for narrow phones */
+  --breakpoint-xs: 30rem;
+}
+
+/* iOS safe-area support for bottom nav */
+.pb-safe {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+}
+
+/* Ensure tap targets are comfortable on touch devices */
+@media (pointer: coarse) {
+  button, a, [role="button"] {
+    min-height: 44px;
+  }
 }
 
 @media (prefers-color-scheme: dark) {

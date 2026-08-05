@@ -56,30 +56,31 @@ export function LeaveBoard({ wardId, initialRecords, initialHistory, initialAwol
   return (
     <div className="space-y-4">
       {/* Tab bar */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-xl">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-xl overflow-x-auto">
           <TabBtn active={tab === 'active'} onClick={() => setTab('active')}>
-            <User className="w-3.5 h-3.5" />
-            Active
-            <Badge className={cn('text-xs', overdueCount > 0 ? 'bg-red-100 text-red-700 animate-pulse' : 'bg-blue-100 text-blue-700')}>
+            <User className="w-3.5 h-3.5 shrink-0" />
+            <span className="hidden xs:inline">Active</span>
+            <Badge className={cn('text-xs shrink-0', overdueCount > 0 ? 'bg-red-100 text-red-700 animate-pulse' : 'bg-blue-100 text-blue-700')}>
               {records.length}
             </Badge>
           </TabBtn>
           <TabBtn active={tab === 'awol'} onClick={() => setTab('awol')}>
-            <ShieldAlert className="w-3.5 h-3.5" />
-            AWOL
+            <ShieldAlert className="w-3.5 h-3.5 shrink-0" />
+            <span className="hidden xs:inline">AWOL</span>
             {awol.length > 0 && (
-              <Badge className="bg-orange-100 text-orange-700 text-xs">{awol.length}</Badge>
+              <Badge className="bg-orange-100 text-orange-700 text-xs shrink-0">{awol.length}</Badge>
             )}
           </TabBtn>
           <TabBtn active={tab === 'history'} onClick={() => setTab('history')}>
-            <History className="w-3.5 h-3.5" />
-            History
-            <Badge className="bg-gray-200 text-gray-600 text-xs">{history.length}</Badge>
+            <History className="w-3.5 h-3.5 shrink-0" />
+            <span className="hidden xs:inline">History</span>
+            <Badge className="bg-gray-200 text-gray-600 text-xs shrink-0">{history.length}</Badge>
           </TabBtn>
         </div>
-        <Button variant="ghost" size="sm" onClick={refresh} loading={loading}>
-          <RefreshCw className="w-4 h-4 mr-1.5" /> Refresh
+        <Button variant="ghost" size="sm" onClick={refresh} loading={loading} className="shrink-0">
+          <RefreshCw className="w-4 h-4 sm:mr-1.5" />
+          <span className="hidden sm:inline">Refresh</span>
         </Button>
       </div>
 
@@ -184,20 +185,22 @@ function LeaveCard({ record, onAction }: { record: LeaveRecord; onAction: () => 
           </span>
         </div>
 
-        <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
+        <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-2 text-sm">
           <div className="flex items-center gap-1.5 text-gray-600">
-            <Clock className="w-3.5 h-3.5 text-gray-400" />
-            Departed {formatTime(record.departureTime)}
+            <Clock className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+            <span className="truncate">Dep. {formatTime(record.departureTime)}</span>
           </div>
           <div className="flex items-center gap-1.5 text-gray-600">
-            <MapPin className="w-3.5 h-3.5 text-gray-400" />
+            <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0" />
             <span className="truncate">{record.destination}</span>
           </div>
-          <div className={cn('flex items-center gap-1.5 font-medium', overdue ? 'text-red-600' : 'text-gray-600')}>
-            <Clock className="w-3.5 h-3.5" />
-            {overdue
-              ? `Overdue ${overdueMins}m`
-              : `Due ${formatTime(dueTime)} ${record.isTimeAgreed ? '(agreed)' : '(proposed)'}`}
+          <div className={cn('flex items-center gap-1.5 font-medium col-span-2 sm:col-span-1', overdue ? 'text-red-600' : 'text-gray-600')}>
+            <Clock className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">
+              {overdue
+                ? `Overdue ${overdueMins}m`
+                : `Due ${formatTime(dueTime)} ${record.isTimeAgreed ? '(agreed)' : '(proposed)'}`}
+            </span>
           </div>
         </div>
 
@@ -208,22 +211,20 @@ function LeaveCard({ record, onAction }: { record: LeaveRecord; onAction: () => 
           </div>
         )}
 
-        <div className="mt-4 flex items-center justify-between gap-2">
+        <div className={cn('mt-4 flex gap-2', overdue ? 'flex-col sm:flex-row sm:items-center sm:justify-between' : 'justify-end')}>
           {overdue && (
             <Button
               variant="outline"
               size="sm"
               onClick={() => setShowEscalate(true)}
-              className="text-orange-600 border-orange-300 hover:bg-orange-50"
+              className="text-orange-600 border-orange-300 hover:bg-orange-50 w-full sm:w-auto"
             >
               <ShieldAlert className="w-4 h-4 mr-1.5" /> Declare AWOL
             </Button>
           )}
-          <div className="ml-auto">
-            <Button size="sm" onClick={() => router.push(`/leave/${record.id}/return`)}>
-              <ClipboardList className="w-4 h-4 mr-1.5" /> Document Return
-            </Button>
-          </div>
+          <Button size="sm" onClick={() => router.push(`/leave/${record.id}/return`)} className={cn(overdue ? 'w-full sm:w-auto' : '')}>
+            <ClipboardList className="w-4 h-4 mr-1.5" /> Document Return
+          </Button>
         </div>
       </div>
 
@@ -384,13 +385,13 @@ function AwolCard({ record, onReturn }: { record: LeaveRecord; onReturn: () => v
         </span>
       </div>
 
-      <div className="mt-3 grid grid-cols-2 gap-3 text-sm text-gray-600">
+      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-600">
         <div className="flex items-center gap-1.5">
-          <MapPin className="w-3.5 h-3.5 text-gray-400" />
+          <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0" />
           <span className="truncate">{record.destination}</span>
         </div>
         <div className="flex items-center gap-1.5 text-orange-700 font-medium">
-          <Clock className="w-3.5 h-3.5" />
+          <Clock className="w-3.5 h-3.5 shrink-0" />
           Overdue {overdueMins}m
         </div>
       </div>
@@ -469,18 +470,18 @@ function HistoryCard({ record }: { record: LeaveRecord }) {
         </div>
       </div>
 
-      <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs text-gray-500">
-        <div className="flex items-center gap-1">
-          <MapPin className="w-3 h-3" /> {record.destination}
+      <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-xs text-gray-500">
+        <div className="flex items-center gap-1 shrink-0">
+          <MapPin className="w-3 h-3 shrink-0" /> <span className="truncate max-w-[120px]">{record.destination}</span>
         </div>
-        <div className="flex items-center gap-1">
-          <Clock className="w-3 h-3" /> Left {formatTime(record.departureTime)}
+        <div className="flex items-center gap-1 shrink-0">
+          <Clock className="w-3 h-3 shrink-0" /> Left {formatTime(record.departureTime)}
         </div>
         {returned && record.actualReturnTime && (
-          <div className="flex items-center gap-1">
-            <CheckCircle2 className="w-3 h-3 text-green-500" />
+          <div className="flex items-center gap-1 shrink-0">
+            <CheckCircle2 className="w-3 h-3 text-green-500 shrink-0" />
             Returned {formatTime(record.actualReturnTime)}
-            {record.returnedBy && <span className="text-gray-400"> · {record.returnedBy.name}</span>}
+            {record.returnedBy && <span className="text-gray-400 hidden sm:inline"> · {record.returnedBy.name}</span>}
           </div>
         )}
       </div>

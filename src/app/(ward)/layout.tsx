@@ -13,8 +13,9 @@ export default async function WardLayout({ children }: { children: React.ReactNo
         wardName={session.user.wardName}
         role={session.user.role ?? 'NURSE'}
       />
-      <main className="flex-1 ml-64 overflow-auto">
-        <div className="max-w-5xl mx-auto px-6 py-8">
+      {/* pt-14 on mobile clears the fixed top bar; pb-20 clears the bottom nav */}
+      <main className="flex-1 md:ml-64 overflow-auto pt-14 pb-20 md:pt-0 md:pb-0">
+        <div className="max-w-5xl mx-auto px-4 py-5 md:px-6 md:py-8">
           {children}
         </div>
       </main>

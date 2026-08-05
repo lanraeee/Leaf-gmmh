@@ -10,7 +10,7 @@ export default function NewLeavePage() {
           <ChevronLeft className="w-5 h-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">New Leave Record</h1>
+          <h1 className="text-xl md:text-2xl font-bold text-gray-900">New Leave Record</h1>
           <p className="text-sm text-gray-500">Complete all steps, then hand tablet to senior nurse for approval</p>
         </div>
       </div>

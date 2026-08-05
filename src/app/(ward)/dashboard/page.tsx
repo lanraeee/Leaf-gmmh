@@ -56,12 +56,13 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Ward Dashboard</h1>
-          <p className="text-sm text-gray-500">{formatDateTime(new Date())}</p>
+          <h1 className="text-xl md:text-2xl font-bold text-gray-900">Ward Dashboard</h1>
+          <p className="text-xs md:text-sm text-gray-500">{formatDateTime(new Date())}</p>
         </div>
-        <Link href="/leave/new">
+        {/* Hidden on mobile — bottom nav provides New Leave shortcut */}
+        <Link href="/leave/new" className="hidden sm:block shrink-0">
           <Button size="lg">
             <Plus className="w-5 h-5 mr-2" /> New Leave Record
           </Button>
@@ -71,10 +72,10 @@ export default async function DashboardPage() {
       {alerts.length > 0 && (
         <div className="space-y-2">
           {alerts.map((alert) => (
-            <div key={alert.id} className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-2xl px-4 py-3 text-sm text-red-800">
-              <AlertTriangle className="w-4 h-4 shrink-0 text-red-500" />
-              <span>{alert.message}</span>
-              <span className="text-red-400 ml-auto">
+            <div key={alert.id} className="flex items-start gap-3 bg-red-50 border border-red-200 rounded-2xl px-4 py-3 text-sm text-red-800">
+              <AlertTriangle className="w-4 h-4 shrink-0 text-red-500 mt-0.5" />
+              <span className="flex-1 min-w-0">{alert.message}</span>
+              <span className="text-red-400 shrink-0 text-xs">
                 {alert.leaveRecord.patient?.firstName} {alert.leaveRecord.patient?.lastName}
               </span>
             </div>

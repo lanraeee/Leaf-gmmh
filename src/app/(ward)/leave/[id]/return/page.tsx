@@ -37,9 +37,9 @@ export default function ReturnPage({ params }: Props) {
   }
 
   return (
-    <div className="max-w-xl mx-auto space-y-6">
+    <div className="max-w-xl mx-auto space-y-4 md:space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Patient Return</h1>
+        <h1 className="text-xl md:text-2xl font-bold text-gray-900">Patient Return</h1>
         <p className="text-sm text-gray-500">Document the patient's return condition</p>
       </div>
 
