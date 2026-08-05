@@ -91,22 +91,22 @@ export function ApprovalScreen({ leaveRecord, wardId, onApproved }: ApprovalScre
           <div className="grid grid-cols-2 gap-3">
             <button
               onClick={() => setMethod('pin')}
-              className="flex flex-col items-center gap-3 p-6 rounded-2xl border-2 border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-all"
+              className="flex flex-col items-center gap-2 md:gap-3 p-4 md:p-6 rounded-2xl border-2 border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-all"
             >
-              <ShieldCheck className="w-8 h-8 text-blue-600" />
+              <ShieldCheck className="w-7 h-7 md:w-8 md:h-8 text-blue-600" />
               <div className="text-center">
-                <p className="font-semibold text-gray-900">PIN Code</p>
-                <p className="text-xs text-gray-500 mt-1">Enter your 6-digit manager PIN</p>
+                <p className="font-semibold text-gray-900 text-sm md:text-base">PIN Code</p>
+                <p className="text-xs text-gray-500 mt-0.5 hidden sm:block">Enter your 6-digit manager PIN</p>
               </div>
             </button>
             <button
               onClick={() => setMethod('signature')}
-              className="flex flex-col items-center gap-3 p-6 rounded-2xl border-2 border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-all"
+              className="flex flex-col items-center gap-2 md:gap-3 p-4 md:p-6 rounded-2xl border-2 border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-all"
             >
-              <FileSignature className="w-8 h-8 text-blue-600" />
+              <FileSignature className="w-7 h-7 md:w-8 md:h-8 text-blue-600" />
               <div className="text-center">
-                <p className="font-semibold text-gray-900">Live Signature</p>
-                <p className="text-xs text-gray-500 mt-1">Sign on the tablet screen</p>
+                <p className="font-semibold text-gray-900 text-sm md:text-base">Signature</p>
+                <p className="text-xs text-gray-500 mt-0.5 hidden sm:block">Sign on the tablet screen</p>
               </div>
             </button>
           </div>

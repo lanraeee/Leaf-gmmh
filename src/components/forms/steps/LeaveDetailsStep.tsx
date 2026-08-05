@@ -73,7 +73,7 @@ export function LeaveDetailsStep({ data, onChange }: LeaveDetailsStepProps) {
       )}
 
       {isEscorted && (
-        <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-200">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-200">
           <p className="col-span-2 text-sm font-medium text-gray-700">Escort details</p>
           <Input
             label="Escort name"

@@ -100,7 +100,7 @@ export function PINPad({ onVerify, onSuccess, className }: PINPadProps) {
       )}
 
       {/* Keypad */}
-      <div className="grid grid-cols-3 gap-3 w-64">
+      <div className="grid grid-cols-3 gap-3 w-full max-w-[280px]">
         {KEYS.map((key, i) => {
           if (key === '') return <div key={i} />
           return (
@@ -109,7 +109,7 @@ export function PINPad({ onVerify, onSuccess, className }: PINPadProps) {
               onClick={() => handleKey(key)}
               disabled={!!isLocked || state === 'checking'}
               className={cn(
-                'h-16 rounded-2xl text-xl font-semibold transition-all active:scale-95',
+                'h-14 md:h-16 rounded-2xl text-xl font-semibold transition-all active:scale-95',
                 'bg-gray-100 text-gray-900 hover:bg-gray-200 disabled:opacity-40',
                 key === '⌫' && 'text-gray-500'
               )}

@@ -48,7 +48,7 @@ export default async function ReportsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Reports</h1>
+        <h1 className="text-xl md:text-2xl font-bold text-gray-900">Reports</h1>
         <p className="text-sm text-gray-500">Last 30 days</p>
       </div>
 

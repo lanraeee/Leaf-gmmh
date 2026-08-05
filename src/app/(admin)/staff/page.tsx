@@ -27,13 +27,13 @@ export default async function StaffPage() {
   const canApprove = staff.filter((s) => ['SENIOR_NURSE', 'CHARGE_NURSE', 'ADMIN'].includes(s.role))
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-5 md:space-y-6">
+      <div className="flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Staff & PINs</h1>
+          <h1 className="text-xl md:text-2xl font-bold text-gray-900">Staff & PINs</h1>
           <p className="text-sm text-gray-500">{staff.length} active staff members</p>
         </div>
-        <Button size="md">
+        <Button size="md" className="shrink-0">
           <Plus className="w-4 h-4 mr-2" /> Add Staff
         </Button>
       </div>
@@ -52,26 +52,37 @@ export default async function StaffPage() {
         {staff.map((member, i) => {
           const canApproveLeave = ['SENIOR_NURSE', 'CHARGE_NURSE', 'ADMIN'].includes(member.role)
           return (
-            <div key={member.id} className={`flex items-center px-6 py-4 gap-4 ${i > 0 ? 'border-t border-gray-100' : ''}`}>
+            <div key={member.id} className={`flex items-center px-4 md:px-6 py-4 gap-3 ${i > 0 ? 'border-t border-gray-100' : ''}`}>
+              {/* Avatar */}
               <div className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center text-sm font-bold text-gray-700 shrink-0">
                 {member.name.charAt(0).toUpperCase()}
               </div>
+
+              {/* Name + email */}
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-gray-900">{member.name}</p>
-                <p className="text-xs text-gray-500">{member.email} · {member.ward?.name ?? 'No ward'}</p>
+                <p className="font-semibold text-gray-900 truncate">{member.name}</p>
+                <p className="text-xs text-gray-500 truncate">
+                  <span className="hidden sm:inline">{member.email} · </span>
+                  {member.ward?.name ?? 'No ward'}
+                </p>
               </div>
-              <Badge className={`text-xs ${ROLE_COLORS[member.role]}`}>
+
+              {/* Role badge */}
+              <Badge className={`text-xs shrink-0 ${ROLE_COLORS[member.role]}`}>
                 {ROLE_LABELS[member.role]}
               </Badge>
+
+              {/* PIN status — hidden on small phones */}
               {canApproveLeave && (
-                <div className="flex items-center gap-1.5 text-xs">
+                <div className="hidden sm:flex items-center gap-1.5 text-xs shrink-0">
                   <Key className="w-3.5 h-3.5 text-gray-400" />
                   {member.pinHash
                     ? <span className="text-green-600 font-medium">PIN set</span>
                     : <span className="text-amber-600 font-medium">No PIN</span>}
                 </div>
               )}
-              <Button size="sm" variant="outline">
+
+              <Button size="sm" variant="outline" className="shrink-0">
                 {canApproveLeave ? 'Set PIN' : 'Edit'}
               </Button>
             </div>
