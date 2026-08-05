@@ -78,17 +78,21 @@ export function CameraCapture({ onPhotoCapture, onClear, className }: CameraCapt
 
   function blurFaceRegion(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
     const { width, height } = canvas
-    // Pixelate top 55% of image (covers head/face for standing patients)
     const faceH = Math.floor(height * 0.55)
     const pixelSize = 18
+
+    // Read the entire face region once (single GPU readback instead of ~1500 individual ones)
+    const imageData = ctx.getImageData(0, 0, width, faceH)
+    const data = imageData.data
+
     for (let y = 0; y < faceH; y += pixelSize) {
       for (let x = 0; x < width; x += pixelSize) {
-        const data = ctx.getImageData(x, y, 1, 1).data
-        ctx.fillStyle = `rgb(${data[0]},${data[1]},${data[2]})`
+        const idx = (y * width + x) * 4
+        ctx.fillStyle = `rgb(${data[idx]},${data[idx + 1]},${data[idx + 2]})`
         ctx.fillRect(x, y, pixelSize, pixelSize)
       }
     }
-    // Add a privacy notice bar
+
     ctx.fillStyle = 'rgba(0,0,0,0.65)'
     ctx.fillRect(0, 0, width, 32)
     ctx.fillStyle = '#fff'

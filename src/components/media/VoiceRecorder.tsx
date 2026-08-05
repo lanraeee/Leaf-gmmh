@@ -14,6 +14,8 @@ interface VoiceRecorderProps {
 
 type RecorderState = 'idle' | 'recording' | 'recorded' | 'playing'
 
+const BAR_COUNT = 40
+
 export function VoiceRecorder({
   onRecordingComplete,
   onClear,
@@ -24,7 +26,6 @@ export function VoiceRecorder({
   const [elapsed, setElapsed] = useState(0)
   const [duration, setDuration] = useState(0)
   const [audioUrl, setAudioUrl] = useState<string | null>(null)
-  const [waveform, setWaveform] = useState<number[]>(Array(40).fill(4))
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const chunksRef = useRef<Blob[]>([])
@@ -32,6 +33,8 @@ export function VoiceRecorder({
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const analyserRef = useRef<AnalyserNode | null>(null)
   const animFrameRef = useRef<number>(0)
+  // Direct DOM refs for waveform bars — avoids 60fps React re-renders during recording
+  const barRefs = useRef<(HTMLDivElement | null)[]>([])
 
   useEffect(() => {
     return () => {
@@ -64,6 +67,8 @@ export function VoiceRecorder({
       setState('recorded')
       stream.getTracks().forEach((t) => t.stop())
       cancelAnimationFrame(animFrameRef.current)
+      // Reset bars to flat
+      barRefs.current.forEach((b) => { if (b) b.style.height = '4px' })
     }
 
     recorder.start(100)
@@ -72,12 +77,14 @@ export function VoiceRecorder({
 
     timerRef.current = setInterval(() => setElapsed((s) => s + 1), 1000)
 
+    // Animate waveform via direct DOM manipulation — no React state updates at 60fps
     function drawWave() {
       if (!analyserRef.current) return
       const data = new Uint8Array(analyserRef.current.frequencyBinCount)
       analyserRef.current.getByteFrequencyData(data)
-      const bars = Array.from(data.slice(0, 40)).map((v) => Math.max(4, (v / 255) * 48))
-      setWaveform(bars)
+      barRefs.current.forEach((bar, i) => {
+        if (bar) bar.style.height = `${Math.max(4, (data[i] / 255) * 48)}px`
+      })
       animFrameRef.current = requestAnimationFrame(drawWave)
     }
     drawWave()
@@ -104,7 +111,7 @@ export function VoiceRecorder({
     setAudioUrl(null)
     setElapsed(0)
     setDuration(0)
-    setWaveform(Array(40).fill(4))
+    barRefs.current.forEach((b) => { if (b) b.style.height = '4px' })
     setState('idle')
     onClear?.()
   }
@@ -113,20 +120,20 @@ export function VoiceRecorder({
     return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
   }
 
+  const barColor = state === 'recording' ? 'bg-red-400' : state === 'recorded' || state === 'playing' ? 'bg-blue-400' : 'bg-gray-300'
+
   return (
     <div className={cn('rounded-2xl border-2 border-dashed border-gray-200 p-6 bg-gray-50', className)}>
       <p className="text-sm font-medium text-gray-700 mb-4">{label}</p>
 
-      {/* Waveform */}
+      {/* Waveform — bars animated via direct DOM, not React state */}
       <div className="flex items-center gap-0.5 h-14 mb-4 justify-center">
-        {waveform.map((h, i) => (
+        {Array.from({ length: BAR_COUNT }).map((_, i) => (
           <div
             key={i}
-            className={cn(
-              'w-1.5 rounded-full transition-all duration-75',
-              state === 'recording' ? 'bg-red-400' : state === 'recorded' || state === 'playing' ? 'bg-blue-400' : 'bg-gray-300'
-            )}
-            style={{ height: `${h}px` }}
+            ref={(el) => { barRefs.current[i] = el }}
+            className={cn('w-1.5 rounded-full', barColor)}
+            style={{ height: '4px', transition: state === 'recording' ? 'none' : 'height 75ms' }}
           />
         ))}
       </div>
