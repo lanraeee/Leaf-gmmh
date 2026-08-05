@@ -2,11 +2,16 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { signOut } from 'next-auth/react'
 import {
   LayoutDashboard, ClipboardList, Users, BarChart3, ShieldCheck, LogOut, Activity
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Role } from '@/types'
+
+function handleSignOut() {
+  signOut({ callbackUrl: '/login' })
+}
 
 interface SidebarProps {
   userName: string
@@ -84,12 +89,12 @@ export function Sidebar({ userName, wardName, role }: SidebarProps) {
               <p className="text-xs text-gray-400 capitalize">{role.replace(/_/g, ' ').toLowerCase()}</p>
             </div>
           </div>
-          <Link
-            href="/api/auth/signout"
+          <button
+            onClick={handleSignOut}
             className="flex items-center gap-2 text-xs text-gray-400 hover:text-red-400 transition-colors"
           >
             <LogOut className="w-3.5 h-3.5" /> Sign out
-          </Link>
+          </button>
         </div>
       </aside>
 
@@ -108,9 +113,9 @@ export function Sidebar({ userName, wardName, role }: SidebarProps) {
           <div className="w-7 h-7 bg-gray-700 rounded-full flex items-center justify-center text-xs font-bold text-gray-200">
             {userName.charAt(0).toUpperCase()}
           </div>
-          <Link href="/api/auth/signout" className="text-gray-400 hover:text-red-400 p-1">
+          <button onClick={handleSignOut} className="text-gray-400 hover:text-red-400 p-1">
             <LogOut className="w-4 h-4" />
-          </Link>
+          </button>
         </div>
       </header>
 
