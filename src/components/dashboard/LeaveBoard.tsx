@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   Clock, MapPin, User, AlertTriangle, CheckCircle2, RefreshCw,
   History, ShieldAlert, PhoneCall, FileWarning, ChevronDown, ChevronUp,
-  X
+  X, ClipboardList
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -151,22 +152,11 @@ function EmptyState({ icon, message }: { icon: React.ReactNode; message: string 
 // ─── Active leave card ────────────────────────────────────────────────────────
 
 function LeaveCard({ record, onAction }: { record: LeaveRecord; onAction: () => void }) {
-  const [returning, setReturning] = useState(false)
+  const router = useRouter()
   const [showEscalate, setShowEscalate] = useState(false)
   const dueTime = record.agreedReturnTime ?? record.proposedReturnTime
   const overdue = isOverdue(dueTime)
   const overdueMins = dueTime ? minutesOverdue(dueTime) : 0
-
-  async function markReturned() {
-    setReturning(true)
-    await fetch(`/api/leave/${record.id}/return`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ actualReturnTime: new Date().toISOString() }),
-    })
-    onAction()
-    setReturning(false)
-  }
 
   return (
     <>
@@ -230,8 +220,8 @@ function LeaveCard({ record, onAction }: { record: LeaveRecord; onAction: () => 
             </Button>
           )}
           <div className="ml-auto">
-            <Button size="sm" onClick={markReturned} loading={returning}>
-              <CheckCircle2 className="w-4 h-4 mr-1.5" /> Mark Returned
+            <Button size="sm" onClick={() => router.push(`/leave/${record.id}/return`)}>
+              <ClipboardList className="w-4 h-4 mr-1.5" /> Document Return
             </Button>
           </div>
         </div>
@@ -369,22 +359,11 @@ function AwolEscalationModal({ record, onClose, onDone }: {
 // ─── AWOL patient card ────────────────────────────────────────────────────────
 
 function AwolCard({ record, onReturn }: { record: LeaveRecord; onReturn: () => void }) {
+  const router = useRouter()
   const [expanded, setExpanded] = useState(false)
-  const [returning, setReturning] = useState(false)
   const esc = record.awolEscalation
   const dueTime = record.agreedReturnTime ?? record.proposedReturnTime
   const overdueMins = dueTime ? minutesOverdue(dueTime) : 0
-
-  async function markReturned() {
-    setReturning(true)
-    await fetch(`/api/leave/${record.id}/return`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ actualReturnTime: new Date().toISOString() }),
-    })
-    onReturn()
-    setReturning(false)
-  }
 
   return (
     <div className="bg-white rounded-2xl border-2 border-orange-300 shadow-orange-100 shadow-md p-5">
@@ -444,8 +423,8 @@ function AwolCard({ record, onReturn }: { record: LeaveRecord; onReturn: () => v
       )}
 
       <div className="mt-4 flex justify-end">
-        <Button size="sm" onClick={markReturned} loading={returning}>
-          <CheckCircle2 className="w-4 h-4 mr-1.5" /> Mark Returned
+        <Button size="sm" onClick={() => router.push(`/leave/${record.id}/return`)}>
+          <ClipboardList className="w-4 h-4 mr-1.5" /> Document Return
         </Button>
       </div>
     </div>

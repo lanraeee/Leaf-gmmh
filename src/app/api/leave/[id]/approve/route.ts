@@ -34,7 +34,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       }),
       db.leaveRecord.update({
         where: { id },
-        data: { status: 'APPROVED', departureTime: new Date() },
+        data: { status: 'ON_LEAVE', departureTime: new Date() },
       }),
     ])
 
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       }),
       db.leaveRecord.update({
         where: { id },
-        data: { status: 'APPROVED', departureTime: new Date() },
+        data: { status: 'ON_LEAVE', departureTime: new Date() },
       }),
     ])
 

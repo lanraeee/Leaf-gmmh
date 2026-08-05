@@ -13,8 +13,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const record = await db.leaveRecord.findUnique({ where: { id } })
   if (!record) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  if (!['ON_LEAVE', 'OVERDUE'].includes(record.status)) {
-    return NextResponse.json({ error: 'Only ON_LEAVE or OVERDUE records can be escalated to AWOL' }, { status: 400 })
+  if (!['ON_LEAVE', 'OVERDUE', 'APPROVED'].includes(record.status)) {
+    return NextResponse.json({ error: 'Only active leave records can be escalated to AWOL' }, { status: 400 })
   }
 
   await db.leaveRecord.update({

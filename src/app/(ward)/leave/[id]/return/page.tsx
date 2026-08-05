@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { use, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { CheckCircle2, AlertTriangle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -13,6 +13,7 @@ interface Props {
 }
 
 export default function ReturnPage({ params }: Props) {
+  const { id } = use(params)
   const router = useRouter()
   const [conditionNotes, setConditionNotes] = useState('')
   const [incident, setIncident] = useState(false)
@@ -21,7 +22,6 @@ export default function ReturnPage({ params }: Props) {
   const [submitting, setSubmitting] = useState(false)
 
   async function submit() {
-    const { id } = await params
     setSubmitting(true)
     await fetch(`/api/leave/${id}/return`, {
       method: 'POST',
@@ -63,7 +63,6 @@ export default function ReturnPage({ params }: Props) {
             rows={3}
           />
 
-          {/* Incident flag */}
           <div>
             <p className="text-sm font-medium text-gray-700 mb-2">Incident on return?</p>
             <div className="flex gap-3">
