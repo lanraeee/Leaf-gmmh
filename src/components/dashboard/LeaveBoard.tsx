@@ -50,7 +50,7 @@ export function LeaveBoard({ wardId, initialRecords, initialHistory, initialAwol
   }, [refresh])
 
   const overdueCount = records.filter(
-    (r) => r.status === 'OVERDUE' || isOverdue(r.agreedReturnTime ?? r.proposedReturnTime)
+    (r) => r.status === 'OVERDUE' || (r.status === 'ON_LEAVE' && isOverdue(r.agreedReturnTime ?? r.proposedReturnTime))
   ).length
 
   return (
@@ -155,7 +155,7 @@ function LeaveCard({ record, onAction }: { record: LeaveRecord; onAction: () => 
   const router = useRouter()
   const [showEscalate, setShowEscalate] = useState(false)
   const dueTime = record.agreedReturnTime ?? record.proposedReturnTime
-  const overdue = isOverdue(dueTime)
+  const overdue = (record.status === 'ON_LEAVE' && isOverdue(dueTime)) || record.status === 'OVERDUE'
   const overdueMins = dueTime ? minutesOverdue(dueTime) : 0
 
   return (
