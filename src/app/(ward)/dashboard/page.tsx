@@ -10,12 +10,11 @@ export default async function DashboardPage() {
   const session = await auth()
   const wardId = session?.user?.wardId
 
-  const [activeRecords, alerts] = await Promise.all([
+  const wardFilter = wardId ? { wardId } : {}
+
+  const [activeRecords, historyRecords, awolRecords, alerts] = await Promise.all([
     db.leaveRecord.findMany({
-      where: {
-        status: { in: ['ON_LEAVE', 'OVERDUE', 'APPROVED'] },
-        ...(wardId ? { wardId } : {}),
-      },
+      where: { status: { in: ['ON_LEAVE', 'OVERDUE', 'APPROVED'] }, ...wardFilter },
       include: {
         patient: { include: { ward: true } },
         approval: { include: { approvedBy: true } },
@@ -25,13 +24,29 @@ export default async function DashboardPage() {
       },
       orderBy: { createdAt: 'desc' },
     }),
+    db.leaveRecord.findMany({
+      where: { status: { in: ['RETURNED', 'CANCELLED'] }, ...wardFilter },
+      include: {
+        patient: { include: { ward: true } },
+        approval: { include: { approvedBy: true } },
+        returnedBy: true,
+      },
+      orderBy: { updatedAt: 'desc' },
+      take: 50,
+    }),
+    db.leaveRecord.findMany({
+      where: { status: 'AWOL', ...wardFilter },
+      include: {
+        patient: { include: { ward: true } },
+        approval: { include: { approvedBy: true } },
+        awolEscalation: { include: { escalatedBy: true } },
+      },
+      orderBy: { updatedAt: 'desc' },
+    }),
     db.alert.findMany({
       where: {
         isAcknowledged: false,
-        leaveRecord: {
-          ...(wardId ? { wardId } : {}),
-          status: { in: ['ON_LEAVE', 'OVERDUE'] },
-        },
+        leaveRecord: { ...wardFilter, status: { in: ['ON_LEAVE', 'OVERDUE', 'AWOL'] } },
       },
       include: { leaveRecord: { include: { patient: true } } },
       orderBy: { createdAt: 'desc' },
@@ -41,7 +56,6 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* Page header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Ward Dashboard</h1>
@@ -54,7 +68,6 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
-      {/* Active alerts */}
       {alerts.length > 0 && (
         <div className="space-y-2">
           {alerts.map((alert) => (
@@ -69,8 +82,12 @@ export default async function DashboardPage() {
         </div>
       )}
 
-      {/* Live leave board */}
-      <LeaveBoard wardId={wardId ?? ''} initialRecords={activeRecords as never[]} />
+      <LeaveBoard
+        wardId={wardId ?? ''}
+        initialRecords={activeRecords as never[]}
+        initialHistory={historyRecords as never[]}
+        initialAwol={awolRecords as never[]}
+      />
     </div>
   )
 }

@@ -50,6 +50,7 @@ export function statusColor(status: string) {
     case 'ON_LEAVE': return 'bg-green-100 text-green-800'
     case 'OVERDUE': return 'bg-red-100 text-red-800'
     case 'RETURNED': return 'bg-gray-100 text-gray-700'
+    case 'AWOL': return 'bg-orange-100 text-orange-700'
     case 'CANCELLED': return 'bg-gray-100 text-gray-400'
     default: return 'bg-gray-100 text-gray-700'
   }

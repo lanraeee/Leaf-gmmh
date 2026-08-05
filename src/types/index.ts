@@ -1,7 +1,7 @@
 export type Role = 'NURSE' | 'SENIOR_NURSE' | 'CHARGE_NURSE' | 'ADMIN'
 export type LegalStatus = 'VOLUNTARY' | 'INVOLUNTARY_SECTION' | 'COMMUNITY_ORDER'
 export type LeaveType = 'UNESCORTED' | 'ESCORTED' | 'THERAPEUTIC_LEAVE' | 'OVERNIGHT' | 'EXTENDED'
-export type LeaveStatus = 'PENDING_APPROVAL' | 'APPROVED' | 'ON_LEAVE' | 'RETURNED' | 'OVERDUE' | 'CANCELLED'
+export type LeaveStatus = 'PENDING_APPROVAL' | 'APPROVED' | 'ON_LEAVE' | 'RETURNED' | 'OVERDUE' | 'AWOL' | 'CANCELLED'
 export type ConsentStatus = 'CONSENTED' | 'DECLINED' | 'NOT_APPLICABLE'
 export type AlertSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'
 
@@ -38,6 +38,18 @@ export interface Patient {
   parisSource: boolean
 }
 
+export interface AwolEscalation {
+  id: string
+  leaveRecordId: string
+  escalatedById: string
+  escalatedBy?: Staff
+  notifiedStaff?: string | null
+  policeContacted: boolean
+  policeIncidentNo?: string | null
+  notes?: string | null
+  escalatedAt: Date
+}
+
 export interface LeaveRecord {
   id: string
   patientId: string
@@ -47,6 +59,7 @@ export interface LeaveRecord {
   initiatedById: string
   initiatedBy?: Staff
   returnedById?: string | null
+  returnedBy?: Staff | null
   leaveType: LeaveType
   status: LeaveStatus
   destination: string
@@ -64,6 +77,7 @@ export interface LeaveRecord {
   consent?: PatientConsent | null
   voiceRecording?: VoiceRecording | null
   appearance?: PatientAppearance | null
+  awolEscalation?: AwolEscalation | null
   createdAt: Date
   updatedAt: Date
 }

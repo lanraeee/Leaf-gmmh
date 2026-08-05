@@ -35,6 +35,7 @@ enum LeaveStatus {
   ON_LEAVE
   RETURNED
   OVERDUE
+  AWOL
   CANCELLED
 }
 
@@ -86,10 +87,11 @@ model Staff {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  ward          Ward?         @relation(fields: [wardId], references: [id])
-  initiatedLeaves LeaveRecord[] @relation("InitiatedBy")
+  ward            Ward?           @relation(fields: [wardId], references: [id])
+  initiatedLeaves LeaveRecord[]   @relation("InitiatedBy")
   approvedLeaves  LeaveApproval[]
-  returnedLeaves  LeaveRecord[] @relation("ReturnedBy")
+  returnedLeaves  LeaveRecord[]   @relation("ReturnedBy")
+  awolEscalations AwolEscalation[]
   auditLogs       AuditLog[]
   sessions        Session[]
   accounts        Account[]
@@ -158,6 +160,7 @@ model LeaveRecord {
   consent           PatientConsent?
   voiceRecording    VoiceRecording?
   appearance        PatientAppearance?
+  awolEscalation    AwolEscalation?
   alerts            Alert[]
   auditLogs         AuditLog[]
 }
@@ -218,6 +221,22 @@ model PatientAppearance {
   capturedAt      DateTime @default(now())
 
   leaveRecord     LeaveRecord @relation(fields: [leaveRecordId], references: [id])
+}
+
+// ─── AWOL Escalation ─────────────────────────────────────────────────────────
+
+model AwolEscalation {
+  id              String   @id @default(cuid())
+  leaveRecordId   String   @unique
+  escalatedById   String
+  notifiedStaff   String?
+  policeContacted Boolean  @default(false)
+  policeIncidentNo String?
+  notes           String?  @db.Text
+  escalatedAt     DateTime @default(now())
+
+  leaveRecord     LeaveRecord @relation(fields: [leaveRecordId], references: [id])
+  escalatedBy     Staff       @relation(fields: [escalatedById], references: [id])
 }
 
 // ─── Alerts ───────────────────────────────────────────────────────────────────
