@@ -67,12 +67,32 @@ model Ward {
   code        String   @unique
   location    String
   phone       String?
+  email       String?
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+
+  units        WardUnit[]
+  staff        Staff[]
+  patients     Patient[]
+  leaveRecords LeaveRecord[]
+}
+
+model WardUnit {
+  id          String   @id @default(cuid())
+  wardId      String
+  name        String
+  code        String
+  description String?
+  bedCount    Int?
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
 
-  staff       Staff[]
+  ward        Ward     @relation(fields: [wardId], references: [id])
   patients    Patient[]
-  leaveRecords LeaveRecord[]
+
+  @@unique([wardId, code])
 }
 
 model Staff {
@@ -87,14 +107,15 @@ model Staff {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  ward            Ward?           @relation(fields: [wardId], references: [id])
-  initiatedLeaves LeaveRecord[]   @relation("InitiatedBy")
-  approvedLeaves  LeaveApproval[]
-  returnedLeaves  LeaveRecord[]   @relation("ReturnedBy")
-  awolEscalations AwolEscalation[]
-  auditLogs       AuditLog[]
-  sessions        Session[]
-  accounts        Account[]
+  ward              Ward?             @relation(fields: [wardId], references: [id])
+  initiatedLeaves   LeaveRecord[]     @relation("InitiatedBy")
+  approvedLeaves    LeaveApproval[]
+  returnedLeaves    LeaveRecord[]     @relation("ReturnedBy")
+  awolEscalations   AwolEscalation[]
+  auditLogs         AuditLog[]
+  pushSubscriptions PushSubscription[]
+  sessions          Session[]
+  accounts          Account[]
 }
 
 model Patient {
@@ -108,6 +129,7 @@ model Patient {
   gender          String?
   legalStatus     LegalStatus  @default(VOLUNTARY)
   wardId          String
+  unitId          String?
   consultantName  String?
   admissionDate   DateTime?
   riskLevel       String?      @default("LOW")
@@ -119,6 +141,7 @@ model Patient {
   updatedAt       DateTime     @updatedAt
 
   ward            Ward         @relation(fields: [wardId], references: [id])
+  unit            WardUnit?    @relation(fields: [unitId], references: [id])
   leaveRecords    LeaveRecord[]
 }
 
@@ -233,6 +256,9 @@ model AwolEscalation {
   policeContacted Boolean  @default(false)
   policeIncidentNo String?
   notes           String?  @db.Text
+  // InPhase incident reference
+  inphaseRef      String?
+  inphaseStatus   String?
   escalatedAt     DateTime @default(now())
 
   leaveRecord     LeaveRecord @relation(fields: [leaveRecordId], references: [id])
@@ -269,6 +295,33 @@ model AuditLog {
 
   staff           Staff        @relation(fields: [staffId], references: [id])
   leaveRecord     LeaveRecord? @relation(fields: [leaveRecordId], references: [id])
+}
+
+// ─── Push Notifications ───────────────────────────────────────────────────────
+
+model PushSubscription {
+  id          String   @id @default(cuid())
+  staffId     String
+  endpoint    String   @unique
+  p256dh      String
+  auth        String
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  staff       Staff    @relation(fields: [staffId], references: [id], onDelete: Cascade)
+}
+
+model NotificationLog {
+  id          String   @id @default(cuid())
+  staffId     String?
+  wardId      String?
+  channel     String   // "push" | "email"
+  type        String   // "AWOL" | "OVERDUE" | "ALERT" | "RETURN"
+  subject     String
+  recipientRef String? // email address or push endpoint prefix
+  success     Boolean
+  error       String?
+  sentAt      DateTime @default(now())
 }
 
 // ─── NextAuth Tables ─────────────────────────────────────────────────────────

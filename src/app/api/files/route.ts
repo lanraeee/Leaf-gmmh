@@ -10,8 +10,12 @@ export async function GET(req: NextRequest) {
   const blobUrl = req.nextUrl.searchParams.get('url')
   if (!blobUrl) return NextResponse.json({ error: 'Missing url param' }, { status: 400 })
 
-  // Only allow fetching our own blob store
-  if (!blobUrl.startsWith('https://') || !blobUrl.includes('vercel-storage.com')) {
+  // Only allow fetching our own blob store — parse the URL to check the hostname exactly
+  let parsed: URL
+  try { parsed = new URL(blobUrl) } catch {
+    return NextResponse.json({ error: 'Invalid blob URL' }, { status: 400 })
+  }
+  if (parsed.protocol !== 'https:' || !parsed.hostname.endsWith('.vercel-storage.com')) {
     return NextResponse.json({ error: 'Invalid blob URL' }, { status: 400 })
   }
 

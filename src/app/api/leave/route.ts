@@ -10,8 +10,12 @@ export async function GET(req: NextRequest) {
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { searchParams } = req.nextUrl
-  const wardId = searchParams.get('wardId')
+  const requestedWardId = searchParams.get('wardId')
   const statuses = (searchParams.get('status') ?? '').split(',').filter(Boolean)
+
+  const isCrossWardRole = ['CHARGE_NURSE', 'ADMIN'].includes(session.user.role)
+  // Non-admin users are always scoped to their own ward
+  const wardId = isCrossWardRole ? requestedWardId : (session.user.wardId ?? requestedWardId)
 
   const records = await db.leaveRecord.findMany({
     where: {

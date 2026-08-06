@@ -45,6 +45,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   if (method === 'SIGNATURE') {
     if (!signatureData) return NextResponse.json({ error: 'No signature data' }, { status: 400 })
 
+    const approver = await db.staff.findUnique({ where: { id: session.user.id }, select: { role: true, name: true } })
+    if (!approver || !['SENIOR_NURSE', 'CHARGE_NURSE', 'ADMIN'].includes(approver.role)) {
+      return NextResponse.json({ error: 'Only senior nurses or above may approve via signature' }, { status: 403 })
+    }
+
     await db.$transaction([
       db.leaveApproval.create({
         data: {

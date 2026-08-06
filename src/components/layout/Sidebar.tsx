@@ -4,10 +4,11 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { signOut } from 'next-auth/react'
 import {
-  LayoutDashboard, ClipboardList, Users, BarChart3, ShieldCheck, LogOut, Activity
+  LayoutDashboard, ClipboardList, Users, BarChart3, ShieldCheck, LogOut, Activity, Building2
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Role } from '@/types'
+import { NotificationBell } from '@/components/notifications/NotificationBell'
 
 function handleSignOut() {
   signOut({ callbackUrl: '/login' })
@@ -24,6 +25,7 @@ const NAV = [
   { href: '/leave/new', label: 'New Leave', icon: ClipboardList, roles: ['NURSE', 'SENIOR_NURSE', 'CHARGE_NURSE'] },
   { href: '/patients', label: 'Patients', icon: Users, roles: ['CHARGE_NURSE', 'ADMIN'] },
   { href: '/staff', label: 'Staff & PINs', icon: ShieldCheck, roles: ['CHARGE_NURSE', 'ADMIN'] },
+  { href: '/wards', label: 'Wards', icon: Building2, roles: ['CHARGE_NURSE', 'ADMIN'] },
   { href: '/reports', label: 'Reports', icon: BarChart3, roles: ['CHARGE_NURSE', 'ADMIN'] },
 ]
 
@@ -84,10 +86,11 @@ export function Sidebar({ userName, wardName, role }: SidebarProps) {
             <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center text-sm font-bold text-gray-200">
               {userName.charAt(0).toUpperCase()}
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-white truncate">{userName}</p>
               <p className="text-xs text-gray-400 capitalize">{role.replace(/_/g, ' ').toLowerCase()}</p>
             </div>
+            <NotificationBell />
           </div>
           <button
             onClick={handleSignOut}
@@ -109,7 +112,8 @@ export function Sidebar({ userName, wardName, role }: SidebarProps) {
             {wardName && <p className="text-xs text-gray-400 leading-none mt-0.5">{wardName}</p>}
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
+          <NotificationBell />
           <div className="w-7 h-7 bg-gray-700 rounded-full flex items-center justify-center text-xs font-bold text-gray-200">
             {userName.charAt(0).toUpperCase()}
           </div>

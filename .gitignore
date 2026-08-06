@@ -30,8 +30,11 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# env files — keep example in git, exclude all real env files
+.env
+.env.local
+.env.*.local
+.env.production
 
 # vercel
 .vercel
@@ -43,6 +46,4 @@ next-env.d.ts
 # Patient uploads — on-premise storage only, never in git
 /uploads/
 
-# Local env overrides
-.env.local
-.env.*.local
+.vercel
